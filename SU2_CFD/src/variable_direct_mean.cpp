@@ -180,8 +180,8 @@ CEulerVariable::CEulerVariable(double val_density, double *val_velocity, double 
   Secondary = new double [nSecondaryVar];
   for (iVar = 0; iVar < nSecondaryVar; iVar++) Secondary[iVar] = 0.0;
 
-  /*--- Incompressible flow, gradients primitive variables nDim+2, (P,vx,vy,vz,rho),
-        FreeSurface Incompressible flow, primitive variables nDim+3, (P,vx,vy,vz,rho,beta,dist),
+  /*--- Incompressible flow, gradients primitive variables nDim+3, (P,vx,vy,vz,rho),
+        FreeSurface Incompressible flow, primitive variables nDim+6, (P,vx,vy,vz,rho,beta,dist),
         Compressible flow, gradients primitive variables nDim+4, (T,vx,vy,vz,P,rho,h)
         We need P, and rho for running the adjoint problem ---*/
   Gradient_Primitive = new double* [nPrimVarGrad];
@@ -310,8 +310,8 @@ CEulerVariable::CEulerVariable(double *val_solution, unsigned short val_nDim, un
   Secondary = new double [nSecondaryVar];
   for (iVar = 0; iVar < nSecondaryVar; iVar++) Secondary[iVar] = 0.0;
 
-  /*--- Incompressible flow, gradients primitive variables nDim+2, (P,vx,vy,vz,rho),
-        FreeSurface Incompressible flow, primitive variables nDim+4, (P,vx,vy,vz,rho,beta,dist),
+  /*--- Incompressible flow, gradients primitive variables nDim+3, (P,vx,vy,vz,rho),
+        FreeSurface Incompressible flow, primitive variables nDim+6, (P,vx,vy,vz,rho,beta,dist),
         Compressible flow, gradients primitive variables nDim+4, (T,vx,vy,vz,P,rho,h)
         We need P, and rho for running the adjoint problem ---*/
   Gradient_Primitive = new double* [nPrimVarGrad];
