@@ -2,7 +2,7 @@
  * \file numerics_template.cpp
  * \brief This file contains all the convective term discretization.
  * \author F. Palacios
- * \version 3.2.7.2 "eagle"
+ * \version 3.2.7.3 "eagle"
  *
  * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
@@ -112,7 +112,7 @@ void CConvective_Template::ComputeResidual(double *val_residual, double **val_Ja
   Pressure_j = (SoundSpeed_j * SoundSpeed_j * Density_j) / Gamma;
   Enthalpy_j = (U_j[nDim+1] + Pressure_j) / Density_j;
   
-  /*--- Promediate Roe variables iPoint and jPoint ---*/
+  /*--- Mean Roe variables iPoint and jPoint ---*/
   R = sqrt(Density_j/Density_i);
   RoeDensity = R*Density_i;
   sq_vel = 0;
