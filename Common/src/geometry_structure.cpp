@@ -11932,10 +11932,13 @@ void CPhysicalGeometry::SetColorGrid(CConfig *config) {
 void CPhysicalGeometry::SetColorGrid_Parallel(CConfig *config) {
   
   /*--- Initialize the color vector ---*/
-    
+    unsigned long no_of_global_elements;
+    no_of_global_elements = nElem;
+    nElem = no_of_local_elements;
     Check_IntElem_Orientation(config);
+    nElem = no_of_global_elements;
     Generate_Adjacency_For_Partitioning(no_of_local_elements);
-  
+    
   for (unsigned long iPoint = 0; iPoint < local_node; iPoint++) node[iPoint]->SetColor(0);
   
   /*--- This routine should only ever be called if we have parallel support
