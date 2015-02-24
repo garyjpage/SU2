@@ -5271,6 +5271,8 @@ void CPhysicalGeometry::Generate_Adjacency_For_Partitioning(unsigned long elemen
   int rank = MASTER_NODE, size = SINGLE_NODE;
   unsigned short iNode, jNode, next_node, previous_node, third_node, fourth_node;     // Specifying the next and previous node in an element
   unsigned long loc_elem;
+    unsigned long loc_element_count;
+    loc_element_count = element_count;
   
 #ifdef HAVE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -5462,6 +5464,68 @@ void CPhysicalGeometry::Generate_Adjacency_For_Partitioning(unsigned long elemen
     }
     
   }
+    
+    
+    
+
+    
+    /*--- Post process the adjacency information in order to get it into the
+     proper format before sending the data to ParMETIS. We need to remove
+     repeats and adjust the size of the array for each local node. ---*/
+    
+    if ((rank == MASTER_NODE) && (size > SINGLE_NODE))
+        cout << "Building the graph adjacency structure." << endl;
+    
+    unsigned long loc_adjc_size=0;
+    vector<unsigned long> adjac_vec;
+    unsigned long adj_elem_size;
+    vector<unsigned long>::iterator it;
+    local_elem=loc_element_count;
+    
+    xadj = new unsigned long [npoint_procs[rank]+1];
+    xadj[0]=0;
+    vector<unsigned long> temp_adjacency;
+    unsigned long local_count=0;
+    
+    for (unsigned long i = 0; i < local_node; i++) {
+        
+        for (unsigned long j=0; j<adj_counter[i]; j++) {
+            temp_adjacency.push_back(adjacent_elem[i][j]);
+        }
+        
+        sort(temp_adjacency.begin(), temp_adjacency.end());
+        it = unique( temp_adjacency.begin(), temp_adjacency.end());
+        loc_adjc_size=it - temp_adjacency.begin();
+        
+        temp_adjacency.resize( loc_adjc_size);
+        xadj[local_count+1]=xadj[local_count]+loc_adjc_size;
+        local_count++;
+        
+        for (unsigned long j=0; j<loc_adjc_size; j++) {
+            adjac_vec.push_back(temp_adjacency[j]);
+        }
+        temp_adjacency.clear();
+        
+    }
+    
+    /*--- Now that we know the size, create the final adjacency array ---*/
+    
+    adj_elem_size = xadj[npoint_procs[rank]];
+    adjacency = new unsigned long[adj_elem_size];
+    copy(adjac_vec.begin(),adjac_vec.end(),adjacency);
+    
+    xadj_size = npoint_procs[rank]+1;
+    adjacency_size = adj_elem_size;
+    
+    /*--- Free temporary memory used to build the adjacency. ---*/
+    
+    adjac_vec.clear();
+    delete[] adj_counter;
+    for (unsigned long iPoint=0; iPoint<local_node; iPoint++) {
+        delete[] adjacent_elem[iPoint];
+    }
+    delete [] adjacent_elem;
+
   
 }
 
@@ -6200,12 +6264,12 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
                 elem_reqd = true;
                   
                   
-                for (unsigned long j=0; j<N_POINTS_TRIANGLE; j++) {
-                  if (i != j) {
-                    adjacent_elem[vnodes_triangle[i]-starting_node[rank]][adj_counter[vnodes_triangle[i]-starting_node[rank]]]=vnodes_triangle[j];
-                    adj_counter[vnodes_triangle[i]-starting_node[rank]]++;
-                  }
-                }
+//                for (unsigned long j=0; j<N_POINTS_TRIANGLE; j++) {
+//                  if (i != j) {
+//                    adjacent_elem[vnodes_triangle[i]-starting_node[rank]][adj_counter[vnodes_triangle[i]-starting_node[rank]]]=vnodes_triangle[j];
+//                    adj_counter[vnodes_triangle[i]-starting_node[rank]]++;
+//                  }
+//                }
                 
                   
               }
@@ -6224,12 +6288,12 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
                 elem_reqd = true;
                   
                   
-                for (unsigned long j=0; j<N_POINTS_QUADRILATERAL; j++) {
-                  if (i!=j) {
-                    adjacent_elem[vnodes_quad[i]-starting_node[rank]][adj_counter[vnodes_quad[i]-starting_node[rank]]]=vnodes_quad[j];
-                    adj_counter[vnodes_quad[i]-starting_node[rank]]++;
-                  }
-                }
+//                for (unsigned long j=0; j<N_POINTS_QUADRILATERAL; j++) {
+//                  if (i!=j) {
+//                    adjacent_elem[vnodes_quad[i]-starting_node[rank]][adj_counter[vnodes_quad[i]-starting_node[rank]]]=vnodes_quad[j];
+//                    adj_counter[vnodes_quad[i]-starting_node[rank]]++;
+//                  }
+//                }
                 
                   
                   
@@ -6247,12 +6311,12 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
             for (unsigned long i=0; i<N_POINTS_TETRAHEDRON; i++) {
               if ((vnodes_tetra[i]>=starting_node[rank])&&(vnodes_tetra[i]<ending_node[rank])) {
                 elem_reqd = true;
-                for (unsigned long j=0; j<N_POINTS_TETRAHEDRON; j++) {
-                  if (i!=j) {
-                    adjacent_elem[vnodes_tetra[i]-starting_node[rank]][adj_counter[vnodes_tetra[i]-starting_node[rank]]]=vnodes_tetra[j];
-                    adj_counter[vnodes_tetra[i]-starting_node[rank]]++;
-                  }
-                }
+//                for (unsigned long j=0; j<N_POINTS_TETRAHEDRON; j++) {
+//                  if (i!=j) {
+//                    adjacent_elem[vnodes_tetra[i]-starting_node[rank]][adj_counter[vnodes_tetra[i]-starting_node[rank]]]=vnodes_tetra[j];
+//                    adj_counter[vnodes_tetra[i]-starting_node[rank]]++;
+//                  }
+//                }
               }
             }
             if (elem_reqd) {
@@ -6270,12 +6334,12 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
             for (unsigned long i=0; i<N_POINTS_HEXAHEDRON; i++) {
               if ((vnodes_hexa[i]>=starting_node[rank])&&(vnodes_hexa[i]<ending_node[rank])) {
                 elem_reqd = true;
-                for (unsigned long j=0; j<N_POINTS_HEXAHEDRON; j++) {
-                  if (i!=j) {
-                    adjacent_elem[vnodes_hexa[i]-starting_node[rank]][adj_counter[vnodes_hexa[i]-starting_node[rank]]]=vnodes_hexa[j];
-                    adj_counter[vnodes_hexa[i]-starting_node[rank]]++;
-                  }
-                }
+//                for (unsigned long j=0; j<N_POINTS_HEXAHEDRON; j++) {
+//                  if (i!=j) {
+//                    adjacent_elem[vnodes_hexa[i]-starting_node[rank]][adj_counter[vnodes_hexa[i]-starting_node[rank]]]=vnodes_hexa[j];
+//                    adj_counter[vnodes_hexa[i]-starting_node[rank]]++;
+//                  }
+//                }
               }
             }
             if (elem_reqd) {
@@ -6293,12 +6357,12 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
             for (unsigned long i=0; i<N_POINTS_WEDGE; i++) {
               if ((vnodes_wedge[i]>=starting_node[rank])&&(vnodes_wedge[i]<ending_node[rank])) {
                 elem_reqd = true;
-                for (unsigned long j=0; j<N_POINTS_WEDGE; j++) {
-                  if (i!=j) {
-                    adjacent_elem[vnodes_wedge[i]-starting_node[rank]][adj_counter[vnodes_wedge[i]-starting_node[rank]]]=vnodes_wedge[j];
-                    adj_counter[vnodes_wedge[i]-starting_node[rank]]++;
-                  }
-                }
+//                for (unsigned long j=0; j<N_POINTS_WEDGE; j++) {
+//                  if (i!=j) {
+//                    adjacent_elem[vnodes_wedge[i]-starting_node[rank]][adj_counter[vnodes_wedge[i]-starting_node[rank]]]=vnodes_wedge[j];
+//                    adj_counter[vnodes_wedge[i]-starting_node[rank]]++;
+//                  }
+//                }
               }
             }
             if (elem_reqd) {
@@ -6314,12 +6378,12 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
             for (unsigned long i=0; i<N_POINTS_PYRAMID; i++) {
               if ((vnodes_pyramid[i]>=starting_node[rank])&&(vnodes_pyramid[i]<ending_node[rank])) {
                 elem_reqd = true;
-                for (unsigned long j=0; j<N_POINTS_PYRAMID; j++) {
-                  if (i!=j) {
-                    adjacent_elem[vnodes_pyramid[i]-starting_node[rank]][adj_counter[vnodes_pyramid[i]-starting_node[rank]]]=vnodes_pyramid[j];
-                    adj_counter[vnodes_pyramid[i]-starting_node[rank]]++;
-                  }
-                }
+//                for (unsigned long j=0; j<N_POINTS_PYRAMID; j++) {
+//                  if (i!=j) {
+//                    adjacent_elem[vnodes_pyramid[i]-starting_node[rank]][adj_counter[vnodes_pyramid[i]-starting_node[rank]]]=vnodes_pyramid[j];
+//                    adj_counter[vnodes_pyramid[i]-starting_node[rank]]++;
+//                  }
+//                }
               }
             }
             if (elem_reqd) {
@@ -6343,69 +6407,80 @@ void CPhysicalGeometry::Read_SU2_Format_Parallel(CConfig *config, string val_mes
   
   /*--- Call the Generate_Adjacency_For_Partitioning() function to compute the adjacency matrix ---*/
 
-//  Generate_Adjacency_For_Partitioning(loc_element_count);
   
-  /*--- Store the number of local elements on each rank after determining
-   which elements must be kept in the loop above. ---*/
-  
-  no_of_local_elements = loc_element_count;
-  
-  /*--- Post process the adjacency information in order to get it into the
-   proper format before sending the data to ParMETIS. We need to remove
-   repeats and adjust the size of the array for each local node. ---*/
-
-  if ((rank == MASTER_NODE) && (size > SINGLE_NODE))
-    cout << "Building the graph adjacency structure." << endl;
-  
-  unsigned long loc_adjc_size=0;
-  vector<unsigned long> adjac_vec;
-  unsigned long adj_elem_size;
-  vector<unsigned long>::iterator it;
-  local_elem=loc_element_count;
-  
-  xadj = new unsigned long [npoint_procs[rank]+1];
-  xadj[0]=0;
-  vector<unsigned long> temp_adjacency;
-  unsigned long local_count=0;
-  
-  for (unsigned long i = 0; i < local_node; i++) {
     
-    for (unsigned long j=0; j<adj_counter[i]; j++) {
-      temp_adjacency.push_back(adjacent_elem[i][j]);
-    }
+    /*--- Store the number of local elements on each rank after determining
+     which elements must be kept in the loop above. ---*/
     
-    sort(temp_adjacency.begin(), temp_adjacency.end());
-    it = unique( temp_adjacency.begin(), temp_adjacency.end());
-    loc_adjc_size=it - temp_adjacency.begin();
+    no_of_local_elements = loc_element_count;
     
-    temp_adjacency.resize( loc_adjc_size);
-    xadj[local_count+1]=xadj[local_count]+loc_adjc_size;
-    local_count++;
+  
+//  /*--- Store the number of local elements on each rank after determining
+//   which elements must be kept in the loop above. ---*/
+//  
+//  no_of_local_elements = loc_element_count;
+//  
+//  /*--- Post process the adjacency information in order to get it into the
+//   proper format before sending the data to ParMETIS. We need to remove
+//   repeats and adjust the size of the array for each local node. ---*/
+//
+//  if ((rank == MASTER_NODE) && (size > SINGLE_NODE))
+//    cout << "Building the graph adjacency structure." << endl;
+//  
+//  unsigned long loc_adjc_size=0;
+//  vector<unsigned long> adjac_vec;
+//  unsigned long adj_elem_size;
+//  vector<unsigned long>::iterator it;
+//  local_elem=loc_element_count;
+//  
+//  xadj = new unsigned long [npoint_procs[rank]+1];
+//  xadj[0]=0;
+//  vector<unsigned long> temp_adjacency;
+//  unsigned long local_count=0;
+//  
+//  for (unsigned long i = 0; i < local_node; i++) {
+//    
+//    for (unsigned long j=0; j<adj_counter[i]; j++) {
+//      temp_adjacency.push_back(adjacent_elem[i][j]);
+//    }
+//    
+//    sort(temp_adjacency.begin(), temp_adjacency.end());
+//    it = unique( temp_adjacency.begin(), temp_adjacency.end());
+//    loc_adjc_size=it - temp_adjacency.begin();
+//    
+//    temp_adjacency.resize( loc_adjc_size);
+//    xadj[local_count+1]=xadj[local_count]+loc_adjc_size;
+//    local_count++;
+//    
+//    for (unsigned long j=0; j<loc_adjc_size; j++) {
+//      adjac_vec.push_back(temp_adjacency[j]);
+//    }
+//    temp_adjacency.clear();
+//    
+//  }
+//  
+//  /*--- Now that we know the size, create the final adjacency array ---*/
+//  
+//  adj_elem_size = xadj[npoint_procs[rank]];
+//  adjacency = new unsigned long[adj_elem_size];
+//  copy(adjac_vec.begin(),adjac_vec.end(),adjacency);
+//
+//  xadj_size = npoint_procs[rank]+1;
+//  adjacency_size = adj_elem_size;
+//  
+//  /*--- Free temporary memory used to build the adjacency. ---*/
+//  
+//  adjac_vec.clear();
+//  delete[] adj_counter;
+//  for (iPoint=0; iPoint<local_node; iPoint++) {
+//    delete[] adjacent_elem[iPoint];
+//  }
+//  delete [] adjacent_elem;
     
-    for (unsigned long j=0; j<loc_adjc_size; j++) {
-      adjac_vec.push_back(temp_adjacency[j]);
-    }
-    temp_adjacency.clear();
     
-  }
-  
-  /*--- Now that we know the size, create the final adjacency array ---*/
-  
-  adj_elem_size = xadj[npoint_procs[rank]];
-  adjacency = new unsigned long[adj_elem_size];
-  copy(adjac_vec.begin(),adjac_vec.end(),adjacency);
-
-  xadj_size = npoint_procs[rank]+1;
-  adjacency_size = adj_elem_size;
-  
-  /*--- Free temporary memory used to build the adjacency. ---*/
-  
-  adjac_vec.clear();
-  delete[] adj_counter;
-  for (iPoint=0; iPoint<local_node; iPoint++) {
-    delete[] adjacent_elem[iPoint];
-  }
-  delete [] adjacent_elem;
+    
+    
+    
   
   /*--- For now, the boundary marker information is still read by the
    master node alone (and eventually distributed by the master as well).
@@ -11857,6 +11932,9 @@ void CPhysicalGeometry::SetColorGrid(CConfig *config) {
 void CPhysicalGeometry::SetColorGrid_Parallel(CConfig *config) {
   
   /*--- Initialize the color vector ---*/
+    
+    Check_IntElem_Orientation(config);
+    Generate_Adjacency_For_Partitioning(no_of_local_elements);
   
   for (unsigned long iPoint = 0; iPoint < local_node; iPoint++) node[iPoint]->SetColor(0);
   
