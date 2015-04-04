@@ -3462,6 +3462,9 @@ void CConfig::SetOutput(unsigned short val_software, unsigned short val_izone) {
         switch (Kind_Turb_Model) {
           case SA:     cout << "Spalart Allmaras" << endl; break;
           case SA_NEG: cout << "Negative Spalart Allmaras" << endl; break;
+          case DES97_SA: cout << "DES 97 Spalart Allmaras" << endl; break;
+          case DDES_SA:  cout << "DDES Spalart Allmaras" << endl; break;
+          case IDDES_SA: cout << "IDDES Spalart Allmaras" << endl; break;
           case SST:    cout << "Menter's SST"     << endl; break;
           case ML:     cout << "Machine Learning" << endl;break;
         }

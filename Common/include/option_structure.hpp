@@ -578,14 +578,20 @@ enum ENUM_TURB_MODEL {
   SA      = 1, /*!< \brief Kind of Turbulent model (Spalart-Allmaras). */
   SA_NEG  = 2, /*!< \brief Kind of Turbulent model (Spalart-Allmaras). */
   SST     = 3, /*!< \brief Kind of Turbulence model (Menter SST). */
-  ML      = 4  /*!< \brief Kind of Turbulence model (Machine Learning). */
+  ML      = 4,  /*!< \brief Kind of Turbulence model (Machine Learning). */
+  DES97_SA = 5,  /*!< \brief Kind of Turbulence model (Detached Eddy Simulation 97 variant SA). */
+  DDES_SA  = 6,  /*!< \brief Kind of Turbulence model (Delayed Detached Eddy Simulation variant SA). */
+  IDDES_SA = 7  /*!< \brief Kind of Turbulence model (Improved Delayed Detached Eddy Simulation variant SA). */
 };
 static const map<string, ENUM_TURB_MODEL> Turb_Model_Map = CCreateMap<string, ENUM_TURB_MODEL>
 ("NONE", NO_TURB_MODEL)
 ("SA", SA)
 ("SA_NEG", SA_NEG)
 ("SST", SST)
-("ML", ML);
+("ML", ML)
+("DES97_SA", DES97_SA)
+("DDES_SA", DDES_SA)
+("IDDES_SA", IDDES_SA);
 
 /*!
  * \brief types of transition models

@@ -328,7 +328,9 @@ void Solver_Preprocessing(CSolver ***solver_container, CGeometry **geometry,
   tne2_euler, tne2_ns,
   adj_tne2_euler, adj_tne2_ns,
   poisson, wave, fea, heat,
-  spalart_allmaras, neg_spalart_allmaras, menter_sst, machine_learning, transition,
+  spalart_allmaras, neg_spalart_allmaras,
+  des97_spalart_allmaras, ddes_spalart_allmaras, iddes_spalart_allmaras,
+  menter_sst, machine_learning, transition,
   template_solver;
   
   /*--- Initialize some useful booleans ---*/
@@ -339,10 +341,10 @@ void Solver_Preprocessing(CSolver ***solver_container, CGeometry **geometry,
   tne2_euler       = false;  tne2_ns         = false;
   adj_tne2_euler   = false;  adj_tne2_ns     = false;
   spalart_allmaras = false;  menter_sst      = false;   machine_learning = false;
-  poisson          = false;  neg_spalart_allmaras = false;
-  wave             = false;
-  fea              = false;
-  heat             = false;
+  poisson          = false;  neg_spalart_allmaras   = false;
+  wave             = false;  des97_spalart_allmaras = false;
+  fea              = false;  ddes_spalart_allmaras  = false;
+  heat             = false;  iddes_spalart_allmaras = false;
   transition       = false;
   template_solver  = false;
   
@@ -376,6 +378,9 @@ void Solver_Preprocessing(CSolver ***solver_container, CGeometry **geometry,
     switch (config->GetKind_Turb_Model()) {
       case SA:     spalart_allmaras = true;     break;
       case SA_NEG: neg_spalart_allmaras = true; break;
+      case DES97_SA: des97_spalart_allmaras = true; break;
+      case DDES_SA:  ddes_spalart_allmaras  = true; break;
+      case IDDES_SA: iddes_spalart_allmaras = true; break;
       case SST:    menter_sst = true;           break;
       case ML:     machine_learning = true;     break;
         
@@ -580,7 +585,9 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
   turbulent, adj_turb,
   tne2_euler, adj_tne2_euler,
   tne2_ns, adj_tne2_ns,
-  spalart_allmaras, neg_spalart_allmaras, menter_sst, machine_learning,
+  spalart_allmaras, neg_spalart_allmaras,
+  des97_spalart_allmaras, ddes_spalart_allmaras, iddes_spalart_allmaras,
+  menter_sst, machine_learning,
   poisson,
   wave,
   fea,
@@ -597,7 +604,9 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
   euler            = false;   ns               = false;   turbulent        = false;
   poisson          = false;
   adj_euler        = false;	  adj_ns           = false;	 adj_turb         = false;
-  wave             = false;   heat             = false;   fea              = false;   spalart_allmaras = false; neg_spalart_allmaras = false;
+  wave             = false;   heat             = false;   fea              = false;
+  spalart_allmaras = false;   neg_spalart_allmaras = false;
+  des97_spalart_allmaras = false;   ddes_spalart_allmaras = false; iddes_spalart_allmaras = false;
   tne2_euler       = false;   tne2_ns          = false;
   adj_tne2_euler   = false;	  adj_tne2_ns      = false;
   lin_euler        = false;   menter_sst       = false;    machine_learning = false;
@@ -633,6 +642,9 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
     switch (config->GetKind_Turb_Model()) {
       case SA:     spalart_allmaras = true;     break;
       case SA_NEG: neg_spalart_allmaras = true; break;
+      case DES97_SA: des97_spalart_allmaras = true; break;
+      case DDES_SA:  ddes_spalart_allmaras  = true; break;
+      case IDDES_SA: iddes_spalart_allmaras = true; break;
       case ML:     machine_learning = true;     break;
       case SST:    menter_sst = true; constants = solver_container[MESH_0][TURB_SOL]->GetConstants(); break;
       default: cout << "Specified turbulence model unavailable or none selected" << endl; exit(EXIT_FAILURE); break;
@@ -1413,6 +1425,9 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
             numerics_container[iMGlevel][ADJTURB_SOL][CONV_TERM] = new CUpwSca_AdjTurb(nDim, nVar_Adj_Turb, config);
           }
           else if (neg_spalart_allmaras) {cout << "Adjoint Neg SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+          else if (des97_spalart_allmaras) {cout << "Adjoint DES97 SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+          else if (ddes_spalart_allmaras) {cout << "Adjoint DDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+          else if (iddes_spalart_allmaras) {cout << "Adjoint IDDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
           else if (menter_sst) {cout << "Adjoint SST turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
         break;
       default :
@@ -1426,7 +1441,10 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
         numerics_container[iMGlevel][ADJTURB_SOL][VISC_TERM] = new CAvgGradCorrected_AdjTurb(nDim, nVar_Adj_Turb, config);
       }
       else if (neg_spalart_allmaras) {cout << "Adjoint Neg SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
-      else if (menter_sst) {cout << "Adjoint SST turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (des97_spalart_allmaras) {cout << "Adjoint DES97 SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (ddes_spalart_allmaras) {cout << "Adjoint DDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (iddes_spalart_allmaras) {cout << "Adjoint IDDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+     else if (menter_sst) {cout << "Adjoint SST turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
     }
     
     /*--- Definition of the source term integration scheme for each equation and mesh level ---*/
@@ -1436,6 +1454,9 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
         numerics_container[iMGlevel][ADJTURB_SOL][SOURCE_SECOND_TERM] = new CSourceConservative_AdjTurb(nDim, nVar_Adj_Turb, config);
       }
       else if (neg_spalart_allmaras) {cout << "Adjoint Neg SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (des97_spalart_allmaras) {cout << "Adjoint DES97 SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (ddes_spalart_allmaras) {cout << "Adjoint DDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (iddes_spalart_allmaras) {cout << "Adjoint IDDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
       else if (menter_sst) {cout << "Adjoint SST turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
     }
     
@@ -1443,6 +1464,9 @@ void Numerics_Preprocessing(CNumerics ****numerics_container,
     for (iMGlevel = 0; iMGlevel <= config->GetnMGLevels(); iMGlevel++) {
       if (spalart_allmaras) numerics_container[iMGlevel][ADJTURB_SOL][CONV_BOUND_TERM] = new CUpwLin_AdjTurb(nDim, nVar_Adj_Turb, config);
       else if (neg_spalart_allmaras) {cout << "Adjoint Neg SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (des97_spalart_allmaras) {cout << "Adjoint DES97 SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (ddes_spalart_allmaras) {cout << "Adjoint DDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
+      else if (iddes_spalart_allmaras) {cout << "Adjoint IDDES SA turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
       else if (menter_sst) {cout << "Adjoint SST turbulence model not implemented." << endl; exit(EXIT_FAILURE);}
     }
     

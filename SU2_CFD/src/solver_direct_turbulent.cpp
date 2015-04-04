@@ -1294,7 +1294,10 @@ void CTurbSASolver::Postprocessing(CGeometry *geometry, CSolver **solver_contain
   bool incompressible = (config->GetKind_Regime() == INCOMPRESSIBLE);
   bool freesurface = (config->GetKind_Regime() == FREESURFACE);
   bool neg_spalart_allmaras = (config->GetKind_Turb_Model() == SA_NEG);
-  
+  bool des97_spalart_allmaras = (config->GetKind_Turb_Model() == DES97_SA);
+  bool ddes_spalart_allmaras  = (config->GetKind_Turb_Model() == DDES_SA);
+  bool iddes_spalart_allmaras  = (config->GetKind_Turb_Model() == IDDES_SA);
+
   
   /*--- Compute eddy viscosity ---*/
   
