@@ -3834,6 +3834,8 @@ void COutput::SetConvHistory_Header(ofstream *ConvHist_file, CConfig *config) {
     case SA_NEG: sprintf (turb_resid, ",\"Res_Turb[0]\""); break;
     case ML:	   sprintf (turb_resid, ",\"Res_Turb[0]\""); break;
     case SST:   	sprintf (turb_resid, ",\"Res_Turb[0]\",\"Res_Turb[1]\""); break;
+    case DES97_SA: case DDES_SA: case IDDES_SA:
+                  sprintf (turb_resid, ",\"Res_Turb[0]\""); break;
   }
   char adj_turb_resid[]= ",\"Res_AdjTurb[0]\"";
   char levelset_resid[]= ",\"Res_LevelSet\"";
@@ -4080,6 +4082,8 @@ void COutput::SetConvHistory_Body(ofstream *ConvHist_file,
         case SA_NEG: nVar_Turb = 1; break;
         case ML:	   nVar_Turb = 1; break;
         case SST:    nVar_Turb = 2; break;
+        case DES97_SA: case DDES_SA: case IDDES_SA:
+                      nVar_Turb = 1; break;
       }
     }
     if (transition) nVar_Trans = 2;
@@ -4097,6 +4101,8 @@ void COutput::SetConvHistory_Body(ofstream *ConvHist_file,
         case SA_NEG: nVar_AdjTurb = 1; break;
         case ML:     nVar_AdjTurb = 1; break;
         case SST:    nVar_AdjTurb = 2; break;
+        case DES97_SA: case DDES_SA: case IDDES_SA:
+                      nVar_AdjTurb = 1; break;
       }
     }
     if (TNE2) nVar_AdjTNE2 = config[val_iZone]->GetnSpecies()+nDim+2;
@@ -4774,6 +4780,8 @@ void COutput::SetConvHistory_Body(ofstream *ConvHist_file,
             switch (config[val_iZone]->GetKind_Turb_Model()) {
               case SA:	   cout << "       Res[nu]"; break;
               case SA_NEG: cout << "       Res[nu]"; break;
+              case DES97_SA: case DDES_SA: case IDDES_SA:
+                           cout << "       Res[nu]"; break;
               case ML:	   cout << "       Res[nu]"; break;
               case SST:	   cout << "     Res[kine]" << "     Res[omega]"; break;
             }

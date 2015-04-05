@@ -663,11 +663,11 @@ void CTurbSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **solver_
   
   if (!adjoint) {
     
-    /*--- Update and clip trubulent solution ---*/
+    /*--- Update and clip turbulent solution ---*/
     
     switch (config->GetKind_Turb_Model()) {
         
-      case SA: case ML:
+      case SA: case ML: case DES97_SA: case DDES_SA: case IDDES_SA:
         
         for (iPoint = 0; iPoint < nPointDomain; iPoint++) {
           node[iPoint]->AddClippedSolution(0, config->GetRelaxation_Factor_Turb()*LinSysSol[iPoint], lowerlimit[0], upperlimit[0]);

@@ -50,6 +50,8 @@ CAdjTurbSolver::CAdjTurbSolver(CGeometry *geometry, CConfig *config, unsigned sh
 	switch (config->GetKind_Turb_Model()) {
 		case SA :     nVar = 1; break;
     case SA_NEG : nVar = 1; break;
+    case DES97_SA: case DDES_SA: case IDDES_SA:
+                  nVar = 1; break;
 		case SST :    nVar = 2; break;
 	}
   
